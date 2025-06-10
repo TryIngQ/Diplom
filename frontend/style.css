@@ -99,6 +99,14 @@ body {
 .basket {
     margin: 0 20px 0 0;
 }
+.header__about-us {
+    margin: 0 40px 0 0;
+
+    font-family: 'RobotoMono';
+    font-size: 18px;
+    font-weight: 900;
+    color: #FFF;
+}
 .header__nav {
     display: flex;
     flex-flow: row nowrap;
@@ -144,6 +152,8 @@ body {
     flex-flow: row nowrap;
     justify-content: center;
     align-items: center;
+
+    margin: 0 auto 0 0;
 }
 .logo__icon {
     margin: -8px -10px 0 20px;
@@ -211,7 +221,8 @@ body {
     align-items: center;
 
     margin: 0 0 100px 0;
-    width: 30%;
+    padding: 20px;
+    width: 33.3%;
 }
 .clothes__image-container {
     display: flex;
@@ -535,12 +546,10 @@ body {
 .swiper-pagination-bullet-active {
     background-color: #fff !important;
 }
-
 .hero__content {
     z-index: 5;
     margin: 100px 0 55px 78px;
 }
-
 .hero__title {
     margin: 0 0 28px 1px;
     max-width: 837px;
@@ -551,7 +560,6 @@ body {
     line-height: 84px;
     color: #000;
 }
-
 .hero__descr {
     word-spacing: -0.5px;
     margin: 0 0 88px 0;
@@ -564,7 +572,6 @@ body {
     line-height: 29px;
     color: #000;
 }
-
 .hero__btn {
     padding: 25px 39px;
     font-size: 23px;
@@ -574,7 +581,6 @@ body {
 
     background-color: #ee603c;
 }
-
 .hero__slider {
     margin: 0 0 29px 0;
     align-self: center;
@@ -698,7 +704,7 @@ body {
 .scroll-btn {
     display: flex;
     flex-flow: row nowrap;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
 
     position: sticky;
@@ -719,22 +725,29 @@ body {
     background-color: #FFF;
     transition: background-color .2s linear, opacity .3s linear;
 }
+.scroll-btn > .logo__icon {
+    margin: 0 -25px 10px 0;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+}
 .scroll-btn::after {
     z-index: -1;
     content: '';
 
     position: absolute;
     top: -100px;
-    left: -220px;
+    left: -217px;
 
     width: 100%;
     height: 600%;
 
-    background-color: #9C254D;
+    background-color: #2a9d8f;
     transition: transform .3s linear;
 }
 .scroll-btn:hover {
-    background-color: rgb(15, 15, 15);
+    background-color: #FFF;
 }
 .scroll-btn:hover::after {
     transform: rotate3d(90, -157, 0, 190deg);
@@ -859,6 +872,34 @@ body {
     margin: 0 20px 0 5px;
 }
 
+/* Alert style */
+.buy-alert {
+    display: none;
+
+    z-index: 1;
+    position: sticky;
+
+    bottom: 0;
+    left: 0;
+
+    padding: 20px;
+    background-color: #36ce70f6;
+    color: white;
+}
+.closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.closebtn:hover {
+    color: black;
+}
+
 /* element animation */
 .header__nav-item:hover {
     border-bottom: 1px solid #FFF;
@@ -874,4 +915,27 @@ body {
 }
 .filter-btn--active > .header__nav-descr {
     color: #000;
+}
+
+/* Animation style */
+.is-focused {
+    border: 2px #ee603c;
+}
+.selector_color {
+
+}
+
+.clothes-container:focus {
+    outline: 0;
+    border-bottom: 2px solid #FFF;
+}
+.header__about-us:hover {
+    border-bottom: 1px solid #FFF;
+}
+.clothes__buy-btn:hover {
+    background-color: #1f7268;
+}
+.clothes__basket-btn:hover {
+    color: #FFF;
+    background-color: #000;
 }

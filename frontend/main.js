@@ -233,6 +233,10 @@ const clothesDB = [
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Создание локального хранилища
+    if (!localStorage['buyItems']) localStorage.setItem('buyItems', '[]');
+    if (!localStorage['basketItems']) localStorage.setItem('basketItems', '[]');
+
     // Карусель 
     const heroSwiper = new Swiper('.hero__swiper', {
         loop: true,
@@ -246,18 +250,6 @@ document.addEventListener('DOMContentLoaded', function() {
             el: '.swiper-pagination',
             clickable: true,
             draggable: true,
-        },
-    });
-
-    const workSwiper = new Swiper('.work__swiper', {
-        loop: false,
-        speed: 700,
-        spaceBetween: 100,
-        slidesPerView: 1,
-        pagination: {
-            el: '.work__swiper-pagination',
-            type: 'bullets',
-            clickable: true,
         },
     });
 
@@ -299,6 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Добавление классов
         clothesBlock.classList.add('clothes-container');
+        clothesBlock.tabIndex = 1;
 
         clothesImageContainer.classList.add('clothes__image-container');
         clothesDescrContainer.classList.add('clothes-descr__container');
@@ -347,23 +340,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectColor = document.getElementById('colorSelect');
 
     selectPrice.addEventListener("change", () => {
-        // select value
-        const selectValue = event.target.value;
-
-        switch (selectValue) {
-            case "По возрастанию цены":
-                console.log(1);
-                break;
-            case "По популярности":
-                console.log(2);
-                break;
-            case "По скидке":
-                console.log(3);
-                break;
-            case "По убыванию цены":
-                console.log(4);
-                break;
-        }
+        getFiltersInfo();
     });
     selectColor.addEventListener('change', () => {
         getFiltersInfo();
@@ -493,13 +470,13 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     function getFiltersInfo() {
+        let sortedClothesArray = [];
         console.log(filteredType);
         console.log(selectColor.value);
 
         clothesContainer.innerHTML = '';
         
         clothesDB.forEach(element => {
-
             // Проверка на тип
             if (element.type !== filteredType && filteredType !== null) return;
 
@@ -508,7 +485,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (element.color !== selectColor.value && selectColor.value !== 'Цвет' && selectColor.value !== 'Любой цвет') return;
             };
 
-            // Создание элемента прошедщего фильтрацию
+            // Проверка на наличие скидки
+            if (selectPrice.value === "По скидке" && element.discount === 0) return;
+
+            // Поиск подстроки
+            const searchInput = document.getElementById('searchInput');
+            if (!element.name.includes(searchInput.value)) return;
+
+            sortedClothesArray.push(element);
+        });
+
+        // Проверка по цене
+        switch (selectPrice.value) {
+            case "По возрастанию цены":
+                for (let i = 0; i < sortedClothesArray.length; ++i) {
+                    for (let j = 0; j < sortedClothesArray.length - 1; ++j) {
+                        if (Number(sortedClothesArray[j]['price']) > Number(sortedClothesArray[j + 1]['price'])) {
+                            sortedClothesArray.splice(j, 0, sortedClothesArray[j + 1]);
+                            sortedClothesArray.splice(j + 2, 1);
+                            continue;
+                        };
+                    };
+                };
+                break;
+            case "По убыванию цены":
+                for (let i = 0; i < sortedClothesArray.length; ++i) {
+                    for (let j = 0; j < sortedClothesArray.length - 1; ++j) {
+                        if (Number(sortedClothesArray[j]['price']) > Number(sortedClothesArray[j + 1]['price'])) {
+                            sortedClothesArray.splice(j, 0, sortedClothesArray[j + 1]);
+                            sortedClothesArray.splice(j + 2, 1);
+                            continue;
+                        };
+                    };
+                };
+                sortedClothesArray.reverse();
+                break;
+        };
+
+        // Создание элемента прошедщего фильтрацию
+        sortedClothesArray.forEach(element => {
             createClothesBlock(element);
         });
     };
@@ -519,6 +534,12 @@ document.addEventListener('DOMContentLoaded', function() {
         filterForChildren.classList.remove('filter-btn--active');
         filterWithDiscounts.classList.remove('filter-btn--active');
     };
+
+    // Логика поиска
+    const searchBtn = document.getElementById('searchBtn');
+    searchBtn.addEventListener('click', () => {
+        getFiltersInfo();
+    });
 
     // ScrollUp логика
     function scrollUp() {
@@ -573,27 +594,65 @@ document.addEventListener('DOMContentLoaded', function() {
         clothesPrice.textContent = `${currentClothes.price}р`;
         clothesDiscount.textContent = `${currentClothes.discount}% скидка`;
         clothesDescr.textContent = currentClothes.descr;
+
+        // Добавлеение ID к кнопке
+        const clothesBuyBtn = document.querySelector('.show-clothes__buy-btn');
+        const clothesBasketBtn = document.querySelector('.show-clothes__basket-btn');
+
+        clothesBuyBtn.setAttribute('data-clothes-index', clothesID);
+        clothesBasketBtn.setAttribute('data-clothes-index', clothesID);
     };
     // Закрыть окно просмотра одежды
     const closeShowWindowBtn = document.getElementById('close-showing');
 
-    closeShowWindowBtn.addEventListener('click', () => {
+    function closeShowWindow() {
         const showClothesWindow = document.getElementById('show-clothes');
         showClothesWindow.style.display = 'none';
 
         document.body.classList.remove('stop-scrolling');
-    });
+    };
+
+    closeShowWindowBtn.addEventListener('click', closeShowWindow);
 
     // Купить или добавить в корзину одежду
-    const buyClothesBtn = document.querySelector('show-clothes__buy-btn');
-    const addToBasketClothesBtn = document.querySelector('show-clothes__basket-btn');
+    const buyClothesBtn = document.querySelector('.show-clothes__buy-btn');
+    const addToBasketClothesBtn = document.querySelector('.show-clothes__basket-btn');
 
-    // buyClothesBtn.addEventListener('click', () => {
+    buyClothesBtn.addEventListener('click', () => {
+        const buyAlert = document.querySelector('.buy-alert');
+        buyAlert.style.display = 'block'
+        setTimeout(() => {
+            buyAlert.style.display = 'none'
+        }, 3000);
 
-    // });
-    // addToBasketClothesBtn.addEventListener('click', () => {
+        // Добавление в базу купленных товаров
+        buyClothesLogic(buyClothesBtn.getAttribute('data-clothes-index'), 'buyItems');
+    });
 
-    // });
+    addToBasketClothesBtn.addEventListener('click', () => {
+        const buyAlert = document.querySelector('.buy-alert');
+        buyAlert.style.display = 'block'
+        setTimeout(() => {
+            buyAlert.style.display = 'none'
+        }, 3000);
+
+        // Добавление в базу купленных товаров
+        buyClothesLogic(buyClothesBtn.getAttribute('data-clothes-index'), 'basketItems');
+    });
+
+    // Логика покупки товаров и корзины
+    function buyClothesLogic(clothesID, storageName) {
+        console.log(clothesID);
+
+        // Парсинг текущего массива с обьектами в переменную.
+        let newObject = JSON.parse(localStorage[storageName]);
+
+        // Добавление нового обьекта в переменную.
+        newObject.push(clothesID);
+
+        // Замена массива на актуальный.
+        localStorage[storageName] = JSON.stringify(newObject);
+    };
 
     createCatalog();
     scrollUp();
